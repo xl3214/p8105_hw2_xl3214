@@ -72,7 +72,20 @@ Directions: Join the datasets by merging `snp` into `pols`, and merging `unemplo
 
 ```{r merging}
 data_q1 <- left_join(pols_month, snp) %>%
-  left_join(x = ., y = unemployment)
+  left_join(., unemployment)
 data_q1
 ```
 
+**pols_month**
+There are `r nrow(pols_month)` observations and `r ncol(pols_month)` variables in the cleaned `pols_month` dataset, ranges between years of `r min(pols_month$year)` and `r max(pols_month$year)`. Variables are: *`r colnames(pols_month)`*.
+
+**snp**
+There are `r nrow(snp)` observations and `r ncol(snp)` variables in the cleaned `snp` dataset, ranges between years of `r min(snp$year)` and `r max(snp$year)`. Variables are: *`r colnames(snp)`*.
+
+**unemployment**
+There are `r nrow(unemployment)` observations and `r ncol(unemployment)` variables in the cleaned `unemployment` dataset, ranges between years of `r min(unemployment$year)` and `r max(unemployment$year)`. Variables are: *`r colnames(unemployment)`*.
+
+**merged dataset `data_q1`**
+There are a total of `r nrow(data_q1)` observations and `r ncol(data_q1)` variables in the final merged dataset, ranges between years of `r min(data_q1$year)` and `r max(data_q1$year)`. Variables are: *`r colnames(data_q1)`*. 
+
+## Question 2
