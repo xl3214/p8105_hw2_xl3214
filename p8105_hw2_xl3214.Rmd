@@ -90,19 +90,28 @@ There are `r nrow(unemployment)` observations and `r ncol(unemployment)` variabl
 There are a total of `r nrow(data_q1)` observations and `r ncol(data_q1)` variables in the final merged dataset, ranges between years of `r min(data_q1$year)` and `r max(data_q1$year)`. Variables are: *`r colnames(data_q1)`*. 
 
 ## Question 2
-Directions: Read and clean the Mr. Trash Wheel sheet
+**STEP 1: read & clean Mr. Trash Wheel sheet**
 
+Directions: 
 * specify the sheet in the Excel file and to omit non-data entries (rows with notes / figures; columns containing notes) using arguments in `read_excel`
 * use reasonable variable names
 * omit rows that do not include dumpster-specific data
+* The data include a column for the (approximate) number of homes powered. This calculation is described in the Homes powered note, but not applied to every row in the dataset. Update the data to include a new homes_powered variable based on this calculation.
 
-```{r read the Mr. Trash Wheel sheet}
+```{r read and clean the Mr. Trash Wheel sheet}
 data_q2 <- 
   readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
                      col_names = TRUE, col_types = NULL, range = "A2:N549") %>%
   mutate("day" = format(Date, format="%d")) %>%
   janitor::clean_names() %>%
-  select(dumpster, year, month, day, everything(), -date)
+  select(dumpster, year, month, day, everything(), -date) %>%
+  mutate("homes_powered" = (weight_tons*500)/30)
 data_q2
 ```
+
+**STEP 2: read & clean Professor Trash Wheel and Gwynnda sheet**
+Use a similar process to import, clean, and organize the data for Professor Trash Wheel and Gwynnda, and combine these with the Mr. Trash Wheel dataset to produce a single tidy dataset. To keep track of which Trash Wheel is which, you may need to add an additional variable to all datasets before combining.
+
+Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. For available data, what was the total weight of trash collected by Professor Trash Wheel? What was the total number of cigarette butts collected by Gwynnda in July of 2021?
+
 
