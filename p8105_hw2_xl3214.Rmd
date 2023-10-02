@@ -99,19 +99,49 @@ Directions:
 * The data include a column for the (approximate) number of homes powered. This calculation is described in the Homes powered note, but not applied to every row in the dataset. Update the data to include a new homes_powered variable based on this calculation.
 
 ```{r read and clean the Mr. Trash Wheel sheet}
-data_q2 <- 
+mr_trash_wheel <- 
   readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
-                     col_names = TRUE, col_types = NULL, range = "A2:N549") %>%
+                     sheet = "Mr. Trash Wheel", col_names = TRUE, range = "A2:N549") %>%
   mutate("day" = format(Date, format="%d")) %>%
   janitor::clean_names() %>%
   select(dumpster, year, month, day, everything(), -date) %>%
   mutate("homes_powered" = (weight_tons*500)/30)
-data_q2
+mr_trash_wheel
 ```
 
-**STEP 2: read & clean Professor Trash Wheel and Gwynnda sheet**
+I changed the `date` variable in this sheet to `day` as there are `year` and `month` variables. The Mr. Trash Wheel sheet contains `r ncol(mr_trash_wheel)` variables and `r nrow(mr_trash_wheel)` observations. Variables in this sheet include: *`r colnames(mr_trash_wheel)`*. Variable `dumpster` is the **primary key** that contains values unique to each observation. 
+
+**STEP 2: read & clean Professor Trash Wheel sheet**
+
+```{r}
+professor_trash_wheel <- 
+  readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
+                     sheet = "Professor Trash Wheel", col_names = TRUE, range = "A2:M96") %>%
+  mutate("day" = format(Date, format="%d")) %>%
+  janitor::clean_names() %>%
+  select(dumpster, year, month, day, everything(), -date) %>%
+  mutate("homes_powered" = (weight_tons*500)/30)
+professor_trash_wheel
+```
+
+I changed the `date` variable in this sheet to `day` as there are `year` and `month` variables. The Professor Trash Wheel sheet contains `r ncol(professor_trash_wheel)` variables and `r nrow(professor_trash_wheel)` observations. Variables in this sheet include: *`r colnames(professor_trash_wheel)`*. Variable `dumpster` is the **primary key** that contains values unique to each observation. 
+
 Use a similar process to import, clean, and organize the data for Professor Trash Wheel and Gwynnda, and combine these with the Mr. Trash Wheel dataset to produce a single tidy dataset. To keep track of which Trash Wheel is which, you may need to add an additional variable to all datasets before combining.
 
 Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. For available data, what was the total weight of trash collected by Professor Trash Wheel? What was the total number of cigarette butts collected by Gwynnda in July of 2021?
 
+**STEP 3: read & clean Gwynnda Trash Wheel sheet**
+
+```{r}
+gwynnda_trash_wheel <- 
+  readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
+                     sheet = "Gwynnda Trash Wheel", col_names = TRUE, range = "A2:K108") %>%
+  mutate("day" = format(Date, format="%d")) %>%
+  janitor::clean_names() %>%
+  select(dumpster, year, month, day, everything(), -date) %>%
+  mutate("homes_powered" = (weight_tons*500)/30)
+gwynnda_trash_wheel
+```
+
+I changed the `date` variable in this sheet to `day` as there are `year` and `month` variables. The Professor Trash Wheel sheet contains `r ncol(gwynnda_trash_wheel)` variables and `r nrow(gwynnda_trash_wheel)` observations. Variables in this sheet include: *`r colnames(gwynnda_trash_wheel)`*. Variable `dumpster` is the **primary key** that contains values unique to each observation. 
 
