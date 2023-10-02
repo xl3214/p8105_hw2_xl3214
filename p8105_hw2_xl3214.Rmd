@@ -1,0 +1,27 @@
+---
+title: "p8105_hw2_xl3214"
+output: github_document
+author: "Xuan Lu"
+date: "`r Sys.Date()`"
+---
+## Question 0
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, message = FALSE)
+```
+
+```{r github_repository}
+
+usethis::use_git_config(
+    user.name = "Xuan Lu", 
+    user.email = "xuan.lu.080229@gmail.com"
+  )
+
+```
+
+```{r library_packages, message = FALSE}
+library(moderndive)
+library(tidyverse)
+```
+
+## Question 1
