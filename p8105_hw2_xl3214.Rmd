@@ -28,7 +28,8 @@ library(dplyr)
 Directions: Use `separate()` to break up the variable mon into integer variables `year`, `month`, and `day`; replace month number with month name; create a `president` variable taking values `gop` and `dem`, and remove `prez_dem` and `prez_gop`; and remove the `day` variable.
 
 ```{r clean pols_month}
-pols_month <- read_csv("./fivethirtyeight_datasets/pols-month.csv") %>% 
+pols_month <- 
+  read_csv("./fivethirtyeight_datasets/pols-month.csv") %>% 
   separate(mon, 
          into = c("year","month_num","day"), 
          convert = TRUE) %>% 
@@ -89,3 +90,19 @@ There are `r nrow(unemployment)` observations and `r ncol(unemployment)` variabl
 There are a total of `r nrow(data_q1)` observations and `r ncol(data_q1)` variables in the final merged dataset, ranges between years of `r min(data_q1$year)` and `r max(data_q1$year)`. Variables are: *`r colnames(data_q1)`*. 
 
 ## Question 2
+Directions: Read and clean the Mr. Trash Wheel sheet
+
+* specify the sheet in the Excel file and to omit non-data entries (rows with notes / figures; columns containing notes) using arguments in `read_excel`
+* use reasonable variable names
+* omit rows that do not include dumpster-specific data
+
+```{r read the Mr. Trash Wheel sheet}
+data_q2 <- 
+  readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
+                     col_names = TRUE, col_types = NULL, range = "A2:N549") %>%
+  mutate("day" = format(Date, format="%d")) %>%
+  janitor::clean_names() %>%
+  select(dumpster, year, month, day, everything(), -date)
+data_q2
+```
+
