@@ -28,16 +28,13 @@ library(dplyr)
 Directions: Use `separate()` to break up the variable mon into integer variables `year`, `month`, and `day`; replace month number with month name; create a `president` variable taking values `gop` and `dem`, and remove `prez_dem` and `prez_gop`; and remove the `day` variable.
 
 ```{r clean pols_month}
-cols_dont_want <- c("day", "month_num", "prez_gop", "prez_dem")
-
 pols_month <- read_csv("./fivethirtyeight_datasets/pols-month.csv") %>% 
   separate(mon, 
          into = c("year","month_num","day"), 
          convert = TRUE) %>% 
   mutate("month" = month.name[month_num]) %>%
-  mutate(president = recode(prez_gop, "0" = "dem", "1" = "gop", "2" = "gop"))
-
-pols_month <- pols_month[,!names(pols_month) %in% cols_dont_want, drop = F]
+  mutate(president = recode(prez_gop, "0" = "dem", "1" = "gop", "2" = "gop")) %>%
+  select(year, month, everything(), -day, -prez_gop, -prez_dem, -month_num) 
 pols_month
 ```
 
@@ -69,4 +66,13 @@ unemployment <-
 unemployment
 ```
 
+**STEP 4: Merge datasets**
+
+Directions: Join the datasets by merging `snp` into `pols`, and merging `unemployment` into the result.
+
+```{r merging}
+data_q1 <- left_join(pols_month, snp) %>%
+  left_join(x = ., y = unemployment)
+data_q1
+```
 
