@@ -100,8 +100,8 @@ Directions:
 
 ```{r read and clean the Mr. Trash Wheel sheet}
 mr_trash_wheel <- 
-  readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
-                     sheet = "Mr. Trash Wheel", col_names = TRUE, range = "A2:N549") %>%
+  readxl::read_excel("202309\ Trash\ Wheel\ Collection\ Data.xlsx", 
+                     sheet = "Mr. Trash Wheel", col_names = TRUE, range = "A2:N586") %>%
   janitor::clean_names() %>%
   mutate("day" = format(date, format="%d")) %>%
   mutate("year" = format(year, format="%Y")) %>%
@@ -117,8 +117,8 @@ I changed the *date* variable in this sheet to *day* as there are *year* and *mo
 
 ```{r}
 professor_trash_wheel <- 
-  readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
-                     sheet = "Professor Trash Wheel", col_names = TRUE, range = "A2:M96") %>%
+  readxl::read_excel("202309\ Trash\ Wheel\ Collection\ Data.xlsx", 
+                     sheet = "Professor Trash Wheel", col_names = TRUE, range = "A2:M108") %>%
   janitor::clean_names() %>%
   mutate("day" = format(date, format="%d")) %>%
   mutate("year" = format(year, format="%Y")) %>%
@@ -134,8 +134,8 @@ I changed the *date* variable in this sheet to *day* as there are *year* and *mo
 
 ```{r}
 gwynnda_trash_wheel <- 
-  readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
-                     sheet = "Gwynnda Trash Wheel", col_names = TRUE, range = "A2:K108") %>%
+  readxl::read_excel("202309\ Trash\ Wheel\ Collection\ Data.xlsx", 
+                     sheet = "Gwynnda Trash Wheel", col_names = TRUE, range = "A2:L157") %>%
   janitor::clean_names() %>%
   mutate("day" = format(date, format="%d")) %>%
   mutate("year" = format(year, format="%Y")) %>%
@@ -163,3 +163,5 @@ cig_sum <- data_q2 %>% filter(grepl("gwynnda", dumpster)) %>% filter(month == "J
 ```
 
 The total weight of trash collected by **Professor Trash Wheel** is `r sum(pull(weight_sum, weight_tons))`. The total number of cigarette butts collected by **Gwynnda in July of 2021** is `r sum(pull(cig_sum, cigarette_butts))`.
+
+## Question 3
