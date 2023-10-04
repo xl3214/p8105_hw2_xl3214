@@ -165,3 +165,10 @@ cig_sum <- data_q2 %>% filter(grepl("gwynnda", dumpster)) %>% filter(month == "J
 The total weight of trash collected by **Professor Trash Wheel** is `r sum(pull(weight_sum, weight_tons))`. The total number of cigarette butts collected by **Gwynnda in July of 2021** is `r sum(pull(cig_sum, cigarette_butts))`.
 
 ## Question 3
+Import, clean, and tidy the dataset of baseline demographics. Ensure that sex and APOE4 carrier status are appropriate encoded (i.e. not numeric), and remove any participants who do not meet the stated inclusion criteria (i.e. no MCI at baseline). Discuss important steps in the import process and relevant features of the dataset. How many participants were recruited, and of these how many develop MCI? What is the average baseline age? What proportion of women in the study are APOE4 carriers?
+
+```{r}
+mic_baseline <- 
+  read_csv("./data_mci/MCI_baseline.csv")
+```
+
