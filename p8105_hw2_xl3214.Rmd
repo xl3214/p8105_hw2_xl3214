@@ -25,7 +25,7 @@ library(dplyr)
 ## Question 1
 **STEP 1: Clean dataset pols-month.csv**
 
-Directions: Use `separate()` to break up the variable mon into integer variables `year`, `month`, and `day`; replace month number with month name; create a `president` variable taking values `gop` and `dem`, and remove `prez_dem` and `prez_gop`; and remove the `day` variable.
+Directions: Use `separate()` to break up the variable mon into integer variables *year*, *month*, and *day*; replace month number with month name; create a *president* variable taking values *gop* and *dem*, and remove *prez_dem* and *prez_gop*; and remove the *day* variable.
 
 ```{r clean pols_month}
 pols_month <- 
@@ -41,7 +41,7 @@ pols_month
 
 **STEP 2: Clean dataset snp.csv**
 
-Directions: Use a similar process to the above. For consistency across datasets, arrange according to `year` and `month`, and organize so that `year` and `month` are the leading columns.
+Directions: Use a similar process to the above. For consistency across datasets, arrange according to *year* and *month*, and organize so that *year* and *month* are the leading columns.
 
 ```{r clean snp}
 snp <- 
@@ -55,7 +55,7 @@ snp
 
 **STEP 3: Tidy dataset unemployment.csv**
 
-Directions: Tidy the unemployment data so that it can be merged with the previous datasets. This process will involve switching from *“wide”* to *“long”* format; ensuring that key variables have the same name; and ensuring that key variables take the same values.
+Directions: Tidy the unemployment data so that it can be merged with the previous datasets. This process will involve switching from `“wide”` to `“long”` format; ensuring that key variables have the same name; and ensuring that key variables take the same values.
 
 ```{r clean unemployment}
 unemployment <- 
@@ -69,25 +69,25 @@ unemployment
 
 **STEP 4: Merge datasets**
 
-Directions: Join the datasets by merging `snp` into `pols`, and merging `unemployment` into the result.
+Directions: Join the datasets by merging *snp* into *pols*, and merging *unemployment* into the result.
 
 ```{r merging}
-data_q1 <- left_join(pols_month, snp) %>%
-  left_join(., unemployment)
+data_q1 <- full_join(pols_month, snp, by = c("year","month")) %>%
+  full_join(., unemployment, by = c("year","month"))
 data_q1
 ```
 
 **pols_month**
-There are `r nrow(pols_month)` observations and `r ncol(pols_month)` variables in the cleaned `pols_month` dataset, ranges between years of `r min(pols_month$year)` and `r max(pols_month$year)`. Variables are: *`r colnames(pols_month)`*.
+There are `r nrow(pols_month)` observations and `r ncol(pols_month)` variables in the cleaned *pols_month* dataset, ranges between years of `r min(pols_month$year)` and `r max(pols_month$year)`. Variables are: *`r colnames(pols_month)`*.
 
 **snp**
-There are `r nrow(snp)` observations and `r ncol(snp)` variables in the cleaned `snp` dataset, ranges between years of `r min(snp$year)` and `r max(snp$year)`. Variables are: *`r colnames(snp)`*.
+There are `r nrow(snp)` observations and `r ncol(snp)` variables in the cleaned *snp* dataset, ranges between years of `r min(snp$year)` and `r max(snp$year)`. Variables are: *`r colnames(snp)`*.
 
 **unemployment**
-There are `r nrow(unemployment)` observations and `r ncol(unemployment)` variables in the cleaned `unemployment` dataset, ranges between years of `r min(unemployment$year)` and `r max(unemployment$year)`. Variables are: *`r colnames(unemployment)`*.
+There are `r nrow(unemployment)` observations and `r ncol(unemployment)` variables in the cleaned *unemployment* dataset, ranges between years of `r min(unemployment$year)` and `r max(unemployment$year)`. Variables are: *`r colnames(unemployment)`*.
 
 **merged dataset `data_q1`**
-There are a total of `r nrow(data_q1)` observations and `r ncol(data_q1)` variables in the final merged dataset, ranges between years of `r min(data_q1$year)` and `r max(data_q1$year)`. Variables are: *`r colnames(data_q1)`*. 
+There are a total of `r nrow(data_q1)` observations and `r ncol(data_q1)` variables in the final merged dataset, ranges between years of `r min(data_q1$year)` and `r max(data_q1$year)`. Variables are: *`r colnames(data_q1)`*. Note that I used the `full_join` function with the combination of *year* and *month* as unique identifiers here. This way, all data entries from all tables will be included into the final merged dataset.
 
 ## Question 2
 **STEP 1: read & clean Mr. Trash Wheel sheet**
@@ -102,15 +102,16 @@ Directions:
 mr_trash_wheel <- 
   readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
                      sheet = "Mr. Trash Wheel", col_names = TRUE, range = "A2:N549") %>%
-  mutate("day" = format(Date, format="%d")) %>%
   janitor::clean_names() %>%
+  mutate("day" = format(date, format="%d")) %>%
+  mutate("year" = format(year, format="%Y")) %>%
   select(dumpster, year, month, day, everything(), -date) %>%
   mutate("homes_powered" = (weight_tons*500)/30) %>%
   mutate("dumpster" = paste("mr", dumpster, sep="_"))
 mr_trash_wheel
 ```
 
-I changed the `date` variable in this sheet to `day` as there are `year` and `month` variables. The Mr. Trash Wheel sheet contains `r ncol(mr_trash_wheel)` variables and `r nrow(mr_trash_wheel)` observations. Variables in this sheet include: *`r colnames(mr_trash_wheel)`*. Variable `dumpster` is the **primary key** that contains values unique to each observation. 
+I changed the *date* variable in this sheet to *day* as there are *year* and *month* variables. I also changed the format of *year* to character. The Mr. Trash Wheel sheet contains `r ncol(mr_trash_wheel)` variables and `r nrow(mr_trash_wheel)` observations. Variables in this sheet include: *`r colnames(mr_trash_wheel)`*. Variable *dumpster* is the **primary key** that contains values unique to each observation. 
 
 **STEP 2: read & clean Professor Trash Wheel sheet**
 
@@ -118,15 +119,16 @@ I changed the `date` variable in this sheet to `day` as there are `year` and `mo
 professor_trash_wheel <- 
   readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
                      sheet = "Professor Trash Wheel", col_names = TRUE, range = "A2:M96") %>%
-  mutate("day" = format(Date, format="%d")) %>%
   janitor::clean_names() %>%
+  mutate("day" = format(date, format="%d")) %>%
+  mutate("year" = format(year, format="%Y")) %>%
   select(dumpster, year, month, day, everything(), -date) %>%
   mutate("homes_powered" = (weight_tons*500)/30) %>%
   mutate("dumpster" = paste("professor", dumpster, sep="_"))
 professor_trash_wheel
 ```
 
-I changed the `date` variable in this sheet to `day` as there are `year` and `month` variables. The Professor Trash Wheel sheet contains `r ncol(professor_trash_wheel)` variables and `r nrow(professor_trash_wheel)` observations. Variables in this sheet include: *`r colnames(professor_trash_wheel)`*. Variable `dumpster` is the **primary key** that contains values unique to each observation. 
+I changed the *date* variable in this sheet to *day* as there are *year* and *month* variables. I also changed the format of *year* to character. The Professor Trash Wheel sheet contains `r ncol(professor_trash_wheel)` variables and `r nrow(professor_trash_wheel)` observations. Variables in this sheet include: *`r colnames(professor_trash_wheel)`*. Variable *dumpster* is the **primary key** that contains values unique to each observation. 
 
 **STEP 3: read & clean Gwynnda Trash Wheel sheet**
 
@@ -134,24 +136,30 @@ I changed the `date` variable in this sheet to `day` as there are `year` and `mo
 gwynnda_trash_wheel <- 
   readxl::read_excel("202207\ Trash\ Wheel\ Collection\ Data.xlsx", 
                      sheet = "Gwynnda Trash Wheel", col_names = TRUE, range = "A2:K108") %>%
-  mutate("day" = format(Date, format="%d")) %>%
   janitor::clean_names() %>%
+  mutate("day" = format(date, format="%d")) %>%
+  mutate("year" = format(year, format="%Y")) %>%
   select(dumpster, year, month, day, everything(), -date) %>%
   mutate("homes_powered" = (weight_tons*500)/30) %>%
   mutate("dumpster" = paste("gwynnda",  dumpster, sep="_"))
 gwynnda_trash_wheel
 ```
 
-I changed the `date` variable in this sheet to `day` as there are `year` and `month` variables. The Professor Trash Wheel sheet contains `r ncol(gwynnda_trash_wheel)` variables and `r nrow(gwynnda_trash_wheel)` observations. Variables in this sheet include: *`r colnames(gwynnda_trash_wheel)`*. Variable `dumpster` is the **primary key** that contains values unique to each observation. 
+I changed the *date* variable in this sheet to *day* as there are *year* and *month* variables. I also changed the format of *year* to character. The Professor Trash Wheel sheet contains `r ncol(gwynnda_trash_wheel)` variables and `r nrow(gwynnda_trash_wheel)` observations. Variables in this sheet include: *`r colnames(gwynnda_trash_wheel)`*. Variable *dumpster* is the **primary key** that contains values unique to each observation. 
 
 **STEP 4: merge the three sheets**
-```{r}
+```{r merge the three sheets}
 data_q2 <-
-  left_join(mr_trash_wheel, professor_trash_wheel) %>%
-  left_join(., gwynnda_trash_wheel)
+  full_join(mr_trash_wheel, professor_trash_wheel) %>%
+  full_join(., gwynnda_trash_wheel)
+data_q2
 ```
 
+Note that I used the `full_join` function here. This way, all data entries from all tables will be included into the final merged dataset. The merged data contains `r ncol(data_q2)` variables and `r nrow(data_q2)` observations. Variables in this sheet include: *`r colnames(data_q2)`*. Variable *dumpster* is the **primary key** that contains values unique to each observation.
 
-Use a similar process to import, clean, and organize the data for Professor Trash Wheel and Gwynnda, and combine these with the Mr. Trash Wheel dataset to produce a single tidy dataset. To keep track of which Trash Wheel is which, you may need to add an additional variable to all datasets before combining.
+```{r}
+weight_sum <- data_q2 %>% filter(grepl("professor", dumpster))
+cig_sum <- data_q2 %>% filter(grepl("gwynnda", dumpster)) %>% filter(month == "July") %>% filter(year == "2021")
+```
 
-Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. For available data, what was the total weight of trash collected by Professor Trash Wheel? What was the total number of cigarette butts collected by Gwynnda in July of 2021?
+The total weight of trash collected by **Professor Trash Wheel** is `r sum(pull(weight_sum, weight_tons))`. The total number of cigarette butts collected by **Gwynnda in July of 2021** is `r sum(pull(cig_sum, cigarette_butts))`.
