@@ -157,7 +157,7 @@ data_q2
 
 Note that I used the `full_join` function here. This way, all data entries from all tables will be included into the final merged dataset. The merged data contains `r ncol(data_q2)` variables and `r nrow(data_q2)` observations. Variables in this sheet include: *`r colnames(data_q2)`*. Variable *dumpster* is the **primary key** that contains values unique to each observation.
 
-```{r}
+```{r create new variable to calculate answers to questions}
 weight_sum <- data_q2 %>% filter(grepl("professor", dumpster))
 cig_sum <- data_q2 %>% filter(grepl("gwynnda", dumpster)) %>% filter(month == "July") %>% filter(year == "2021")
 ```
@@ -167,8 +167,16 @@ The total weight of trash collected by **Professor Trash Wheel** is `r sum(pull(
 ## Question 3
 Import, clean, and tidy the dataset of baseline demographics. Ensure that sex and APOE4 carrier status are appropriate encoded (i.e. not numeric), and remove any participants who do not meet the stated inclusion criteria (i.e. no MCI at baseline). Discuss important steps in the import process and relevant features of the dataset. How many participants were recruited, and of these how many develop MCI? What is the average baseline age? What proportion of women in the study are APOE4 carriers?
 
-```{r}
-mic_baseline <- 
-  read_csv("./data_mci/MCI_baseline.csv")
+```{r import and clean the dataset of baseline demographics}
+mci_baseline_description <- read_csv("./data_mci/MCI_baseline.csv") %>% colnames()
+mci_baseline_description
+
+mci_baseline <- read_csv("./data_mci/MCI_baseline.csv", skip = 1) %>%
+  janitor::clean_names() %>% 
+  mutate(sex = recode(sex, "1" = "Male", "0" = "Female")) %>%
+  mutate(apoe4 = recode(apoe4, "1" = "APOE4 carrier", "0" = "APOE4 non-carrier")) %>%
+  filter(age_at_onset > current_age | age_at_onset == ".") %>%
+  mutate(age_at_onset = as.numeric(age_at_onset))
+summary(mci_baseline)
 ```
 
