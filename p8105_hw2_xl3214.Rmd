@@ -163,9 +163,10 @@ sum(pull(cig_sum, cigarette_butts))`.
 
 ## Question 3
 **STEP 1: Clean Baseline Dataset**
+
 Directions: Import, clean, and tidy the dataset of baseline demographics. Ensure that sex and APOE4 carrier status are appropriate encoded (i.e. not numeric), and remove any participants who do not meet the stated inclusion criteria (i.e. no MCI at baseline). 
 
-```{r import and clean the dataset of baseline demographics, message = FALSE}
+```{r import and clean the dataset of baseline demographics, message = FALSE, warning = FALSE}
 mci_baseline_description <- read_csv("./data_mci/MCI_baseline.csv") %>% colnames()
 mci_baseline_description #checking variable descriptions
 
@@ -178,7 +179,9 @@ mci_baseline <- read_csv("./data_mci/MCI_baseline.csv", skip = 1) %>% #use secon
 summary(mci_baseline)
 ```
 
-When importing the dataset, we can notice that the default header of the uncleaned dataset are *`r colnames(mci_baseline_description)`*, which are actually descriptions of each variable. Printing the dataset out, we would notice that the actual header is actually the second row: *`r colnames(mci_baseline)`*. A total of `r nrow(mci_baseline)` participants were recruited, and of these participants, `r nrow(which(pull(mci_baseline, age_at_onset) != "."))` participants developed MCI. The average baseline age is `r mean(pull(mci_baseline, current_age))`, with a range of `r range(pull(mci_baseline, current_age))[1]` to `r range(pull(mci_baseline, current_age))[2]`. `r (count(filter(mci_baseline, apoe4 == "APOE4 carrier" & sex == "Female"))/count(filter(mci_baseline, sex == "Female")))*100`% of women are APOE4 carriers.
+When importing the dataset, we can notice that the default header of the uncleaned dataset are actually descriptions of each variable. Printing the dataset out, we would notice that the actual header is actually the second row: *`r colnames(mci_baseline)`*. 
+
+A total of `r nrow(mci_baseline)` participants were recruited, and of these participants, `r nrow(which(pull(mci_baseline, age_at_onset) != "."))` participants developed MCI. The average baseline age is `r mean(pull(mci_baseline, current_age))`, with a range of `r range(pull(mci_baseline, current_age))[1]` to `r range(pull(mci_baseline, current_age))[2]`. `r (count(filter(mci_baseline, apoe4 == "APOE4 carrier" & sex == "Female"))/count(filter(mci_baseline, sex == "Female")))*100`% of women are APOE4 carriers.
 
 **STEP 2: Clean Amyloid Dataset**
 
@@ -197,16 +200,23 @@ mci_amyloid <- read_csv("./data_mci/mci_amyloid.csv", skip = 1) %>% #use second 
 summary(mci_amyloid)
 ```
 
-When importing the dataset, we can notice that the default header of the uncleaned dataset are *`r colnames(mci_amyloid_description)`*, which are actually descriptions of each variable. Printing the dataset out, we would notice that the actual header is actually the second row: *`r colnames(mci_amyloid)`*. To tidy the dataset, I used `pivot_longer` function to change several columns of different times of followup to rows. 
+When importing the dataset, we can notice that the default header of the uncleaned dataset are actually descriptions of each variable. Printing the dataset out, we would notice that the actual header is actually the second row: *`r colnames(mci_amyloid)`*. To tidy the dataset, I used `pivot_longer` function to change several columns of different times of followup to rows. 
 
-There are `r count(subset(mci_baseline, !id %in% mci_amyloid$id))` participants who appeared in only the baseline dataset but not the amyloid dataset, and `r count(subset(mci_amyloid, !id %in% mci_baseline$id))` participants who appeared in only the amyloid dataset not the baseline dataset. To ensure that only participants with entries in both dataset are included into the final dataset, I will merge the two datasets using the `inner_join` function. 
+There are `r length(unique(subset(mci_baseline, !id %in% mci_amyloid$id)$id))` participants who appeared in only the baseline dataset but not the amyloid dataset, and `r length(unique(subset(mci_amyloid, !id %in% mci_baseline$id)$id))` participants who appeared in only the amyloid dataset not the baseline dataset. To ensure that only participants with entries in both dataset are included into the final dataset, I will merge the two datasets using the `inner_join` function. 
 
 ```{r merge the baseline & amyloid datasets,  message = FALSE}
 data_q3 <- inner_join(mci_baseline, mci_amyloid, by = "id")
 summary(data_q3)
 ```
 
-There are `r nrow(data_q3)` observations and `r ncol(data_q3)` variables in the final merged dataset for MCI. Variables include *`r colnames(data_q3)`*. An Aβ42/40 ratio <0.150 suggests a higher risk of having of AD pathology compared to higher values. 2 years after baseline, `r (count(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 2))/count(filter(data_q3, years_elapsed_since_baseline == 2)))*100`% of participants have An Aβ42/40 ratio <0.150. 4 years after baseline, the proportion increased to `r (count(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 4))/count(filter(data_q3, years_elapsed_since_baseline == 4)))*100`%. 6 years after baseline, the proportion increased to `r (count(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 6))/count(filter(data_q3, years_elapsed_since_baseline == 6)))*100`%, and 8 years after baseline, the proportion increased to `r (count(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 8))/count(filter(data_q3, years_elapsed_since_baseline == 8)))*100`%. Among those that are female, the proportion of having an Aβ42/40 ratio <0.150 8 years after baseline is `r (count(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 8 & sex == "Female"))/count(filter(data_q3, years_elapsed_since_baseline == 8 & sex == "Female")))*100`%, and the proportion is `r (count(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 8 & sex == "Male"))/count(filter(data_q3, years_elapsed_since_baseline == 8 & sex == "Male")))*100`% for males. 
+There are `r nrow(data_q3)` observations, `r length(unique(data_q3$id))` unique participants, and `r ncol(data_q3)` variables in the final merged dataset for MCI. Variables include *`r colnames(data_q3)`*. 
+An Aβ42/40 ratio <0.150 suggests a higher risk of having of AD pathology compared to higher values. 
+2 years after baseline, `r length(unique(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 2))$id)/length(unique(filter(data_q3, years_elapsed_since_baseline == 2))$id)*100`% of participants have An Aβ42/40 ratio <0.150. 
+4 years after baseline, the proportion increased to `r length(unique(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 4))$id)/length(unique(filter(data_q3, years_elapsed_since_baseline == 4))$id)*100`%. 
+6 years after baseline, the proportion increased to `r length(unique(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 6))$id)/length(unique(filter(data_q3, years_elapsed_since_baseline == 6))$id)*100`%. 
+8 years after baseline, the proportion increased to `r length(unique(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 8))$id)/length(unique(filter(data_q3, years_elapsed_since_baseline == 8))$id)*100`%. 
+Among those that are female, the proportion of having an Aβ42/40 ratio <0.150 8 years after baseline is `r length(unique(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 8 & sex == "Female"))$id)/length(unique(filter(data_q3, years_elapsed_since_baseline == 8 & sex == "Female"))$id)*100`%. 
+This proportion is `r length(unique(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 8 & sex == "Male"))$id)/length(unique(filter(data_q3, years_elapsed_since_baseline == 8 & sex == "Male"))$id)*100`% for males. 
 
 ```{r export final result data_q3 into a CSV file to my data directory,  message = FALSE}
 write.csv(data_q3, file = "data_q3.csv", row.names = FALSE, col.names = TRUE)
