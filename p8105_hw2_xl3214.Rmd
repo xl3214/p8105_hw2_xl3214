@@ -206,7 +206,7 @@ mci_amyloid <- read_csv("./data_mci/mci_amyloid.csv", skip = 1) %>% #use second 
 summary(mci_amyloid)
 ```
 
-When importing the dataset, we can notice that the default header of the uncleaned dataset are actually descriptions of each variable. Printing the dataset out, we would notice that the actual header is actually the second row: *`r colnames(mci_amyloid)`*. To tidy the dataset, I used `pivot_longer` function to change several columns of different times of followup to rows. 
+There are a total of `r nrow(mci_amyloid)` observations, `r length(unique(mci_amyloid$id))` unique participants and `r ncol(mci_amyloid)` variables in this dataset. When importing the dataset, we can notice that the default header of the uncleaned dataset are actually descriptions of each variable. Printing the dataset out, we would notice that the actual header is actually the second row: *`r colnames(mci_amyloid)`*. To tidy the dataset, I used `pivot_longer` function to change several columns of different times of followup to rows. 
 
 There are `r length(unique(subset(mci_baseline, !id %in% mci_amyloid$id)$id))` participants who appeared in only the baseline dataset but not the amyloid dataset, and `r length(unique(subset(mci_amyloid, !id %in% mci_baseline$id)$id))` participants who appeared in only the amyloid dataset not the baseline dataset. To ensure that only participants with entries in both dataset are included into the final dataset, I will merge the two datasets using the `inner_join` function. 
 
@@ -225,5 +225,5 @@ Among those that are female, the proportion of having an Aβ42/40 ratio <0.150 8
 This proportion is `r length(unique(filter(data_q3, amyroid_ratio < 0.15 & years_elapsed_since_baseline == 8 & sex == "Male"))$id)/length(unique(filter(data_q3, years_elapsed_since_baseline == 8 & sex == "Male"))$id)*100`% for males. 
 
 ```{r export final result data_q3 into a CSV file to my data directory,  message = FALSE}
-write.csv(data_q3, file = "data_q3.csv", row.names = FALSE, col.names = TRUE)
+write.csv(data_q3, file = "data_q3.csv")
 ```
