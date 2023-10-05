@@ -93,9 +93,13 @@ There are a total of `r nrow(data_q1)` observations and `r ncol(data_q1)` variab
 **STEP 1: read & clean Mr. Trash Wheel sheet**
 
 Directions: 
+
 * specify the sheet in the Excel file and to omit non-data entries (rows with notes / figures; columns containing notes) using arguments in `read_excel`
+
 * use reasonable variable names
+
 * omit rows that do not include dumpster-specific data
+
 * The data include a column for the (approximate) number of homes powered. This calculation is described in the Homes powered note, but not applied to every row in the dataset. Update the data to include a new homes_powered variable based on this calculation.
 
 ```{r read and clean the Mr. Trash Wheel sheet, message = FALSE}
@@ -181,13 +185,15 @@ summary(mci_baseline)
 
 When importing the dataset, we can notice that the default header of the uncleaned dataset are actually descriptions of each variable. Printing the dataset out, we would notice that the actual header is actually the second row: *`r colnames(mci_baseline)`*. 
 
-A total of `r nrow(mci_baseline)` participants were recruited, and of these participants, `r nrow(which(pull(mci_baseline, age_at_onset) != "."))` participants developed MCI. The average baseline age is `r mean(pull(mci_baseline, current_age))`, with a range of `r range(pull(mci_baseline, current_age))[1]` to `r range(pull(mci_baseline, current_age))[2]`. `r (count(filter(mci_baseline, apoe4 == "APOE4 carrier" & sex == "Female"))/count(filter(mci_baseline, sex == "Female")))*100`% of women are APOE4 carriers.
+A total of `r nrow(mci_baseline)` participants were recruited, and of these participants, `r mci_baseline %>% 
+filter(!is.na(age_at_onset)) %>% 
+nrow()` participants developed MCI. The average baseline age is `r mean(pull(mci_baseline, current_age))`, with a range of `r range(pull(mci_baseline, current_age))[1]` to `r range(pull(mci_baseline, current_age))[2]`. `r (count(filter(mci_baseline, apoe4 == "APOE4 carrier" & sex == "Female"))/count(filter(mci_baseline, sex == "Female")))*100`% of women are APOE4 carriers.
 
 **STEP 2: Clean Amyloid Dataset**
 
 Directions: Import, clean, and tidy the dataset of longitudinally observed biomarker values; comment on the steps on the import process and the features of the dataset.
 
-```{r import and clean the dataset of longitudinally observed biomarker values, message = FALSE}
+```{r import and clean the dataset of longitudinally observed biomarker values, message = FALSE, warning = FALSE}
 mci_amyloid_description <- read_csv("./data_mci/mci_amyloid.csv") %>% colnames()
 mci_amyloid_description #checking variable descriptions
 
