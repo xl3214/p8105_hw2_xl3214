@@ -74,7 +74,7 @@ Directions: Join the datasets by merging *snp* into *pols*, and merging *unemplo
 ```{r merging}
 data_q1 <- full_join(pols_month, snp, by = c("year","month")) %>%
   full_join(., unemployment, by = c("year","month"))
-data_q1
+summary(data_q1)
 ```
 
 **pols_month**
@@ -152,31 +152,50 @@ I changed the *date* variable in this sheet to *day* as there are *year* and *mo
 data_q2 <-
   full_join(mr_trash_wheel, professor_trash_wheel) %>%
   full_join(., gwynnda_trash_wheel)
-data_q2
+summary(data_q2)
 ```
 
 Note that I used the `full_join` function here. This way, all data entries from all tables will be included into the final merged dataset. The merged data contains `r ncol(data_q2)` variables and `r nrow(data_q2)` observations. Variables in this sheet include: *`r colnames(data_q2)`*. Variable *dumpster* is the **primary key** that contains values unique to each observation.
 
-```{r create new variable to calculate answers to questions}
-weight_sum <- data_q2 %>% filter(grepl("professor", dumpster))
-cig_sum <- data_q2 %>% filter(grepl("gwynnda", dumpster)) %>% filter(month == "July") %>% filter(year == "2021")
-```
-
-The total weight of trash collected by **Professor Trash Wheel** is `r sum(pull(weight_sum, weight_tons))`. The total number of cigarette butts collected by **Gwynnda in July of 2021** is `r sum(pull(cig_sum, cigarette_butts))`.
+The total weight of trash collected by **Professor Trash Wheel** is `r weight_sum <- data_q2 |> filter(grepl("professor", dumpster)) 
+sum(pull(weight_sum, weight_tons))`. The total number of cigarette butts collected by **Gwynnda in July of 2021** is `r cig_sum <- data_q2 %>% filter(grepl("gwynnda", dumpster)) %>% filter(month == "July") %>% filter(year == "2021") 
+sum(pull(cig_sum, cigarette_butts))`.
 
 ## Question 3
-Import, clean, and tidy the dataset of baseline demographics. Ensure that sex and APOE4 carrier status are appropriate encoded (i.e. not numeric), and remove any participants who do not meet the stated inclusion criteria (i.e. no MCI at baseline). Discuss important steps in the import process and relevant features of the dataset. How many participants were recruited, and of these how many develop MCI? What is the average baseline age? What proportion of women in the study are APOE4 carriers?
+**STEP 1: Clean Baseline Dataset**
+Directions: Import, clean, and tidy the dataset of baseline demographics. Ensure that sex and APOE4 carrier status are appropriate encoded (i.e. not numeric), and remove any participants who do not meet the stated inclusion criteria (i.e. no MCI at baseline). 
 
 ```{r import and clean the dataset of baseline demographics}
 mci_baseline_description <- read_csv("./data_mci/MCI_baseline.csv") %>% colnames()
-mci_baseline_description
+mci_baseline_description #checking variable descriptions
 
-mci_baseline <- read_csv("./data_mci/MCI_baseline.csv", skip = 1) %>%
-  janitor::clean_names() %>% 
-  mutate(sex = recode(sex, "1" = "Male", "0" = "Female")) %>%
+mci_baseline <- read_csv("./data_mci/MCI_baseline.csv", skip = 1) %>% #use second row as header
+  janitor::clean_names() %>% #clean variable names to snake_case
+  mutate(sex = recode(sex, "1" = "Male", "0" = "Female")) %>% #recode sex & apoe4 as character variables
   mutate(apoe4 = recode(apoe4, "1" = "APOE4 carrier", "0" = "APOE4 non-carrier")) %>%
   filter(age_at_onset > current_age | age_at_onset == ".") %>%
   mutate(age_at_onset = as.numeric(age_at_onset))
 summary(mci_baseline)
 ```
 
+When importing the dataset, we can notice that the default header of the uncleaned dataset are *`r colnames(mci_baseline_description)`*, which are actually descriptions of each variable. Printing the dataset out, we would notice that the actual header is actually the second row: *`r colnames(mci_baseline)`*. A total of `r nrow(mci_baseline)` participants were recruited, and of these participants, `r nrow(which(pull(mci_baseline, age_at_onset) != "."))` participants developed MCI. The average baseline age is `r mean(pull(mci_baseline, current_age))`, with a range of `r range(pull(mci_baseline, current_age))[1]` to `r range(pull(mci_baseline, current_age))[2]`. `r (count(filter(mci_baseline, apoe4 == "APOE4 carrier" & sex == "Female"))/count(filter(mci_baseline, sex == "Female")))*100`% of women are APOE4 carriers.
+
+**STEP 2: Clean Amyloid Dataset**
+
+Directions: Import, clean, and tidy the dataset of longitudinally observed biomarker values; comment on the steps on the import process and the features of the dataset.
+
+```{r import and clean the dataset of longitudinally observed biomarker values}
+mci_amyloid_description <- read_csv("./data_mci/mci_amyloid.csv") %>% colnames()
+mci_amyloid_description #checking variable descriptions
+
+mci_amyloid <- read_csv("./data_mci/mci_amyloid.csv", skip = 1) %>% #use second row as header
+  janitor::clean_names() %>%  #clean variable names to snake_case
+  rename(id = study_id, time_0 = baseline) %>% #rename variables to match baseline dataset
+  mutate(time_0 = as.numeric(time_0), time_2 = as.numeric(time_2), time_4 = as.numeric(time_4), time_6 = as.numeric(time_6), time_8 = as.numeric(time_8)) %>% #change character variables of amyroid ratios to numeric
+  pivot_longer(., time_0:time_8, names_to = "years_elapsed_since_baseline", values_to = "amyroid_ratio", names_prefix = "time_")  #tidy dataset
+summary(mci_amyloid)
+```
+
+When importing the dataset, we can notice that the default header of the uncleaned dataset are *`r colnames(mci_amyloid_description)`*, which are actually descriptions of each variable. Printing the dataset out, we would notice that the actual header is actually the second row: *`r colnames(mci_amyloid)`*. 
+
+Check whether some participants appear in only the baseline or amyloid datasets, and comment on your findings. Combine the demographic and biomarker datasets so that only participants who appear in both datasets are retained, and briefly describe the resulting dataset; export the result as a CSV to your data directory.
