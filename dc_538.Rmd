@@ -1,0 +1,101 @@
+---
+title: "Data Cleaning: FiveThirtyEight"
+output: 
+  prettydoc::html_pretty:
+    theme: leonids
+    css: styles.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, message = FALSE)
+```
+
+## Overview
+
+This project is part of the bigger project of which I thoroughly walked through steps in data cleaning & wrangling process. I then did some descriptive explorations of the dataset. In this project, I used the pols-month.csv, unemployment.csv, and snp.csv data from [FiveThirtyEight](https://p8105.com/dataset_fivethirtyeight.html). This project utilized R version 4.3.1, and R packages `tidyverse` and `dplyr`. 
+
+```{r github_repository, echo=FALSE}
+usethis::use_git_config(
+    user.name = "Xuan Lu", 
+    user.email = "xuan.lu.080229@gmail.com"
+  )
+```
+
+```{r library_packages, message = FALSE}
+library(tidyverse)
+library(dplyr)
+```
+
+## STEP 1: Clean dataset pols-month.csv
+
+Directions: Use `separate()` to break up the variable mon into integer variables *year*, *month*, and *day*; replace month number with month name; create a *president* variable taking values *gop* and *dem*, and remove *prez_dem* and *prez_gop*; and remove the *day* variable.
+
+```{r clean pols_month, message = FALSE}
+pols_month <- 
+  read_csv("./fivethirtyeight_datasets/pols-month.csv") %>% 
+  separate(mon, 
+         into = c("year","month_num","day"), 
+         convert = TRUE) %>% 
+  mutate("month" = month.name[month_num]) %>%
+  mutate(president = recode(prez_gop, "0" = "dem", "1" = "gop", "2" = "gop")) %>%
+  select(year, month, everything(), -day, -prez_gop, -prez_dem, -month_num) 
+pols_month
+```
+
+## STEP 2: Clean dataset snp.csv
+
+Directions: Use a similar process to the above. For consistency across datasets, arrange according to *year* and *month*, and organize so that *year* and *month* are the leading columns.
+
+```{r clean snp, message = FALSE }
+snp <- 
+  read_csv("./fivethirtyeight_datasets/snp.csv") %>%
+  separate(date, into = c("month", "day", "year"), sep = "/", convert = TRUE) %>%
+  arrange(year, month) %>%
+  mutate("month" = month.name[month]) %>%
+  select(year, month, close) 
+snp
+```
+
+## STEP 3: Tidy dataset unemployment.csv
+
+Directions: Tidy the unemployment data so that it can be merged with the previous datasets. This process will involve switching from `“wide”` to `“long”` format; ensuring that key variables have the same name; and ensuring that key variables take the same values.
+
+```{r clean unemployment, message = FALSE}
+unemployment <- 
+  read_csv("./fivethirtyeight_datasets/unemployment.csv") %>%
+  pivot_longer(Jan:Dec, names_to = "month_abb", values_to = "unemployment") %>%
+  mutate("month" = factor(month_abb, levels = month.abb, labels = month.name)) %>%
+  rename(year = Year) %>%
+  select(year, month, unemployment)
+unemployment
+```
+
+## STEP 4: Merge datasets
+
+Directions: Join the datasets by merging *snp* into *pols*, and merging *unemployment* into the result.
+
+```{r merging, message = FALSE }
+data_q1 <- full_join(pols_month, snp, by = c("year","month")) %>%
+  full_join(., unemployment, by = c("year","month"))
+summary(data_q1)
+```
+
+**pols_month**
+There are `r nrow(pols_month)` observations and `r ncol(pols_month)` variables in the cleaned *pols_month* dataset, ranges between years of `r min(pols_month$year)` and `r max(pols_month$year)`. Variables are: *`r colnames(pols_month)`*.
+
+**snp**
+There are `r nrow(snp)` observations and `r ncol(snp)` variables in the cleaned *snp* dataset, ranges between years of `r min(snp$year)` and `r max(snp$year)`. Variables are: *`r colnames(snp)`*.
+
+**unemployment**
+There are `r nrow(unemployment)` observations and `r ncol(unemployment)` variables in the cleaned *unemployment* dataset, ranges between years of `r min(unemployment$year)` and `r max(unemployment$year)`. Variables are: *`r colnames(unemployment)`*.
+
+**merged dataset `data_q1`**
+There are a total of `r nrow(data_q1)` observations and `r ncol(data_q1)` variables in the final merged dataset, ranges between years of `r min(data_q1$year)` and `r max(data_q1$year)`. Variables are: *`r colnames(data_q1)`*. Note that I used the `full_join` function with the combination of *year* and *month* as unique identifiers here. This way, all data entries from all tables will be included into the final merged dataset.
+
+## STEP 5: Save cleaned file
+
+We can save our cleaned dataset as follows: 
+
+```{r export final result data_q1 into a CSV file to my data directory,  message = FALSE}
+write.csv(data_q1, file = "data_q1.csv")
+```
